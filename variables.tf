@@ -17,14 +17,6 @@ variable "profile" {
   description = "AWS profile name used in conjunction with \"gimme-aws-creds\""
 }
 
-variable "region" {
-  description = "pick region: us-east-1, us-west-2"
-  validation {
-    condition     = contains(["us-east-1", "us-west-2"], var.region)
-    error_message = "Valid values for var: region are (us-east-1, us-west-2)."
-  }
-}
-
 variable "backend_rest" {
   type = map(string)
   default = {
@@ -98,4 +90,81 @@ variable "ucname" {
 variable "aws_account_id" {
   description = "AWS Account ID"
   type = string
+}
+
+/*
+data "aws_vpc" "dbx_vpc" {
+  id = var.vpc_id
+}
+
+data "aws_subnet" "dbx_subnet_a" {
+  id = var.subnet_id
+}
+
+data "aws_subnet" "dbx_subnet_b" {
+  id = var.subnet_id
+}
+
+data "aws_subnet" "dbx_subnet_endpoints" {
+  id = var.subnet_id
+}
+*/
+
+variable "subnet_a_id"{
+  description = "This is the subnet ID of the first workspace subnet"
+  type        = string
+}
+
+variable "subnet_b_id"{
+  description = "This is the subnet ID of the second workspace subnet"
+  type        = string
+}
+
+variable "subnet_endpoint_id"{
+  description = "This is the subnet ID of the endpoint subnet for the workspace"
+  type        = string
+}
+
+variable "route_table_id"{
+  description = "This is the route table ID of the subnets for the workspace"
+  type        = string
+}
+
+variable "uc_metastore_id"{
+  description = "This is the ID of the Unity Catalog Metastore for the region"
+  type        = string
+
+  // This is the value for AWS us-east-1
+  default     = "2098254d-eb42-446b-8a5b-a0e5d21cd0de"
+}
+
+variable "region" {
+  description = "AWS region code. (e.g. us-east-1)"
+  type        = string
+  validation {
+    condition     = contains(["ap-northeast-1", "ap-northeast-2", "ap-south-1", "ap-southeast-1", "ap-southeast-2", "ca-central-1", "eu-central-1", "eu-west-1", "eu-west-2", "eu-west-3", "sa-east-1", "us-east-1", "us-east-2", "us-west-2"], var.region)
+    error_message = "Valid values for var: region are (ap-northeast-1, ap-northeast-2, ap-south-1, ap-southeast-1, ap-southeast-2, ca-central-1, eu-central-1, eu-west-1, eu-west-2, eu-west-3, sa-east-1, us-east-1, us-east-2, us-west-2)."
+  }
+}
+
+variable "region_name" {
+  description = "Name of the AWS region. (e.g. nvirginia)"
+  type = map(string)
+  default = {
+    "ap-northeast-1" = "tokyo"
+    "ap-northeast-2" = "seoul"
+    "ap-south-1" = "mumbai"
+    "ap-southeast-1" = "singapore"
+    "ap-southeast-2" = "sydney"
+    "ca-central-1" = "canada"
+    "eu-central-1" = "frankfurt"
+    "eu-west-1" = "ireland"
+    "eu-west-2" = "london"
+    "eu-west-3" = "paris"
+    "sa-east-1" = "saopaulo"
+    "us-east-1" = "nvirginia"
+    "us-east-2" = "ohio"
+    "us-west-2" = "oregon"
+    "us-west-1" = "oregon"
+  }
 }

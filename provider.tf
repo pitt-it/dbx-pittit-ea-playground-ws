@@ -13,7 +13,7 @@
 
 provider "aws" {
   region = var.region
-  profile = var.profile
+  //profile = var.profile
 }
 
 // initialize provider in "MWS" mode to provision new workspace

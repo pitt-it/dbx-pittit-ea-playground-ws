@@ -6,7 +6,7 @@ resource "time_sleep" "wait_30_seconds" {
   create_duration = "30s"
 }
 
-
+/*
 // Unity Catalog Trust Policy
 data "aws_iam_policy_document" "passrole_for_unity_catalog" {
   statement {
@@ -147,11 +147,12 @@ resource "databricks_metastore_data_access" "this" {
     databricks_metastore.this, aws_iam_role.unity_catalog_role, time_sleep.wait_30_seconds
   ]
 }
+*/
 
 resource "databricks_metastore_assignment" "default_metastore" {
   provider             = databricks.mws
   workspace_id         = databricks_mws_workspaces.this.id
-  metastore_id         = databricks_metastore.this.id
+  metastore_id         = var.uc_metastore_id
   default_catalog_name = "hive_metastore"
-  depends_on = [databricks_metastore.this, databricks_mws_workspaces.this]
+  depends_on = [databricks_mws_workspaces.this]
 }
