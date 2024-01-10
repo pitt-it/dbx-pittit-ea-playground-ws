@@ -12,10 +12,12 @@ variable "databricks_account_id" {
   description = "Databricks Account Console ID"
 }
 
+/*
 variable "profile" {
   type        = string
   description = "AWS profile name used in conjunction with \"gimme-aws-creds\""
 }
+*/
 
 variable "backend_rest" {
   type = map(string)
@@ -82,33 +84,17 @@ variable "resource_prefix" {
   }
 }
 
+/*
 variable "ucname" {
   description = "URL compliant name for Unity Catalog Metastore"
   type = string
 }
+*/
 
 variable "aws_account_id" {
   description = "AWS Account ID"
   type = string
 }
-
-/*
-data "aws_vpc" "dbx_vpc" {
-  id = var.vpc_id
-}
-
-data "aws_subnet" "dbx_subnet_a" {
-  id = var.subnet_id
-}
-
-data "aws_subnet" "dbx_subnet_b" {
-  id = var.subnet_id
-}
-
-data "aws_subnet" "dbx_subnet_endpoints" {
-  id = var.subnet_id
-}
-*/
 
 variable "subnet_a_id"{
   description = "This is the subnet ID of the first workspace subnet"
