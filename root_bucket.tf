@@ -146,4 +146,3 @@ resource "aws_s3_bucket_policy" "databricks_bucket_restrictive_policy" {
     ]
   })
 }
-*/
