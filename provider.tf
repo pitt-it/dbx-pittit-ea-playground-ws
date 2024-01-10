@@ -8,7 +8,7 @@
   required_providers {
     databricks = { 
       source = "databricks/databricks"
-      version = "~> 1.29.0" 
+      //version = "~> 1.29.0" 
     }
     aws = { source  = "hashicorp/aws" }
   }
