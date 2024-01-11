@@ -51,7 +51,7 @@ data "aws_iam_policy_document" "this" {
       "s3:DeleteObject"]
     resources = [
       "${aws_s3_bucket.root_storage_bucket.arn}/*",
-      "${aws_s3_bucket.root_storage_bucket.arn}]"
+      "${aws_s3_bucket.root_storage_bucket.arn}"
     ]
     principals {
       identifiers = ["arn:aws:iam::${var.ex_databricks_account_id}:root"]
