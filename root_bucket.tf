@@ -145,4 +145,6 @@ resource "aws_s3_bucket_policy" "databricks_bucket_restrictive_policy" {
       }
     ]
   })
+
+  depends_on = [aws_s3_bucket.root_storage_bucket]
 }
