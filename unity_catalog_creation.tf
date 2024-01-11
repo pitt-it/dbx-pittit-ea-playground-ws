@@ -153,7 +153,7 @@ resource "databricks_metastore_data_access" "this" {
 
 resource "databricks_metastore_assignment" "default_metastore" {
   provider             = databricks.mws
-  workspace_id         = databricks_mws_workspaces.this.id
+  workspace_id         = databricks_mws_workspaces.this.workspace_id
   metastore_id         = var.uc_metastore_id
   default_catalog_name = "hive_metastore"
   depends_on = [databricks_mws_workspaces.this]
