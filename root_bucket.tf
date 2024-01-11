@@ -38,7 +38,7 @@ resource "aws_s3_bucket_versioning" "versioning_example" {
   }
 }
 
-/*
+//Unrestricted Polcy
 data "aws_iam_policy_document" "this" {
   statement {
     effect = "Allow"
@@ -68,13 +68,46 @@ data "aws_iam_policy_document" "this" {
   }
 }
 
+/*
+//Restricted Policy
+data "aws_iam_policy_document" "this" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:GetObject",
+      "s3:GetObjectVersion",
+      "s3:ListBucket",
+      "s3:GetBucketLocation",
+      "s3:PutObject",
+      "s3:DeleteObject"]
+    resources = [
+      "${aws_s3_bucket.root_storage_bucket.arn}/*",
+      "${aws_s3_bucket.root_storage_bucket.arn}]"
+    ]
+    principals {
+      identifiers = ["arn:aws:iam::${var.ex_databricks_account_id}:root"]
+      type        = "AWS"
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "aws:PrincipalTag/DatabricksAccountId"
+
+      values = [
+        var.databricks_account_id
+      ]
+    }
+  }
+}
+*/
+
 resource "aws_s3_bucket_policy" "this" {
   bucket     = aws_s3_bucket.root_storage_bucket.id
   policy     = data.aws_iam_policy_document.this.json
   depends_on = [aws_s3_bucket_public_access_block.this]
 }
-*/
 
+
+/*
 // EXPLANATION: Creates a restrictive root bucket policy
 
 // Restrictive Bucket Policy
@@ -148,3 +181,4 @@ resource "aws_s3_bucket_policy" "databricks_bucket_restrictive_policy" {
 
   depends_on = [aws_s3_bucket.root_storage_bucket]
 }
+*/

@@ -11,7 +11,7 @@ resource "databricks_mws_storage_configurations" "this" {
   account_id                 = var.databricks_account_id
   bucket_name                = aws_s3_bucket.root_storage_bucket.bucket
   storage_configuration_name = "${var.resource_prefix}-storage"
-  depends_on                 = [aws_s3_bucket_policy.databricks_bucket_restrictive_policy]
+  //depends_on                 = [aws_s3_bucket_policy.databricks_bucket_restrictive_policy]
 }
 
 resource "databricks_mws_vpc_endpoint" "backend_rest_vpce" {
