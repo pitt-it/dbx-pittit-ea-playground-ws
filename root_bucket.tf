@@ -38,6 +38,7 @@ resource "aws_s3_bucket_versioning" "versioning_example" {
   }
 }
 
+/*
 //Unrestricted Polcy
 data "aws_iam_policy_document" "this" {
   statement {
@@ -67,22 +68,21 @@ data "aws_iam_policy_document" "this" {
     }
   }
 }
+*/
 
-/*
 //Restricted Policy
 data "aws_iam_policy_document" "this" {
   statement {
+    sid = "Grant Databricks Read Access"
     effect = "Allow"
     actions = [
       "s3:GetObject",
       "s3:GetObjectVersion",
       "s3:ListBucket",
-      "s3:GetBucketLocation",
-      "s3:PutObject",
-      "s3:DeleteObject"]
+      "s3:GetBucketLocation"]
     resources = [
       "${aws_s3_bucket.root_storage_bucket.arn}/*",
-      "${aws_s3_bucket.root_storage_bucket.arn}]"
+      "${aws_s3_bucket.root_storage_bucket.arn}"
     ]
     principals {
       identifiers = ["arn:aws:iam::${var.ex_databricks_account_id}:root"]
@@ -97,8 +97,63 @@ data "aws_iam_policy_document" "this" {
       ]
     }
   }
+  statement {
+    sid = "Grant Databricks Write Access"
+    effect = "Allow"
+    actions = [
+      "s3:PutObject",
+      "s3:DeleteObject"]
+    resources = [
+      "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/0_databricks_dev",
+      "${aws_s3_bucket.root_storage_bucket.arn}/ephemeral/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/*",
+      "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}.*/*",
+      "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/databricks/init/*/*.sh",
+      "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/user/hive/warehouse/*.db/",
+      "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/user/hive/warehouse/*.db/*-*",
+      "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/user/hive/warehouse/*__PLACEHOLDER__/",
+      "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/user/hive/warehouse/*.db/*__PLACEHOLDER__/",
+      "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/FileStore/*",
+      "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/databricks/mlflow/*",
+      "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/databricks/mlflow-*/*",
+      "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/mlflow-*/*",
+      "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/pipelines/*",
+      "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/local_disk0/tmp/*",
+      "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/tmp/*"
+    ]
+    principals {
+      identifiers = ["arn:aws:iam::${var.ex_databricks_account_id}:root"]
+      type        = "AWS"
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "aws:PrincipalTag/DatabricksAccountId"
+
+      values = [
+        var.databricks_account_id
+      ]
+    }
+  }
+  statement {
+    sid = "AllowSSLRequestsOnly"
+    effect = "Deny"
+    actions = [
+      "s3:*"
+      ]
+    resources = [
+      "${aws_s3_bucket.root_storage_bucket.arn}/*",
+      "${aws_s3_bucket.root_storage_bucket.arn}"
+    ]
+    principals {
+      identifiers = ["*"]
+      type        = "*"
+    }
+    condition {
+      test     = "Bool"
+      variable = "aws:SecureTransport"
+      values = [false]
+    }
+  }
 }
-*/
 
 resource "aws_s3_bucket_policy" "this" {
   bucket     = aws_s3_bucket.root_storage_bucket.id
@@ -144,22 +199,22 @@ resource "aws_s3_bucket_policy" "this" {
 #           "s3:DeleteObject"
 #         ],
 #         Resource = [
-#           "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/0_databricks_dev",
-#           "${aws_s3_bucket.root_storage_bucket.arn}/ephemeral/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/*",
-#           "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}.*/*",
-#           "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/databricks/init/*/*.sh",
-#           "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/user/hive/warehouse/*.db/",
-#           "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/user/hive/warehouse/*.db/*-*",
-#           "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/user/hive/warehouse/*__PLACEHOLDER__/",
-#           "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/user/hive/warehouse/*.db/*__PLACEHOLDER__/",
-#           "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/FileStore/*",
-#           "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/databricks/mlflow/*",
-#           "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/databricks/mlflow-*/*",
-#           "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/mlflow-*/*",
-#           "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/pipelines/*",
-#           "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/local_disk0/tmp/*",
-#           "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/tmp/*"
-#         ]
+          # "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/0_databricks_dev",
+          # "${aws_s3_bucket.root_storage_bucket.arn}/ephemeral/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/*",
+          # "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}.*/*",
+          # "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/databricks/init/*/*.sh",
+          # "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/user/hive/warehouse/*.db/",
+          # "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/user/hive/warehouse/*.db/*-*",
+          # "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/user/hive/warehouse/*__PLACEHOLDER__/",
+          # "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/user/hive/warehouse/*.db/*__PLACEHOLDER__/",
+          # "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/FileStore/*",
+          # "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/databricks/mlflow/*",
+          # "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/databricks/mlflow-*/*",
+          # "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/mlflow-*/*",
+          # "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/pipelines/*",
+          # "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/local_disk0/tmp/*",
+          # "${aws_s3_bucket.root_storage_bucket.arn}/${var.region_name[var.region]}-prod/${databricks_mws_workspaces.this.workspace_id}/tmp/*"
+#        ]
 #       },
 #       {
 #         Sid       = "AllowSSLRequestsOnly",
